@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      th:replace="~{layout :: content}">
+
+<body>
+
+<div th:fragment="content">
+
+<!-- HEADER -->
+<div class="mb-3 p-3 bg-white shadow-sm rounded-4">
+    <h3 class="fw-bold text-success">📚 Book Rent System</h3>
+    <small class="text-muted">Select book + user to create rent</small>
+</div>
+
+<!-- ================= RENT FORM ================= -->
+<div class="card mb-3 shadow-sm border-0 rounded-4">
+
+    <div class="card-header bg-white fw-bold">📌 Rent Form</div>
+
+    <div class="card-body">
+
+        <input type="hidden" id="bookId">
+        <input type="hidden" id="userId">
+
+        <div class="row">
+
+            <div class="col-md-4">
+                <label>Book</label>
+                <input type="text" id="bookName" class="form-control" readonly>
+            </div>
+
+            <div class="col-md-4">
+                <label>User</label>
+                <input type="text" id="userName" class="form-control" readonly>
+            </div>
+
+            <div class="col-md-2">
+                <label>Rent Date</label>
+                <input type="date" id="rentDate" class="form-control">
+            </div>
+
+            <div class="col-md-2">
+                <label>Due Date</label>
+                <input type="date" id="dueDate" class="form-control">
+            </div>
+
+        </div>
+
+        <button id="confirmRent" class="btn btn-success mt-3">
+            Confirm Rent
+        </button>
+
+    </div>
+</div>
+
+
+
+<!-- ================= 2 COLUMN LAYOUT ================= -->
+<div class="row g-3">
+
+    <!-- LEFT: BOOK TABLE -->
+    <div class="col-md-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white fw-bold">📘 Books</div>
+
+            <div class="card-body p-0">
+            <div class="table-responsive p-2">
+            	<table id="bookTable" class="table table-hover align-middle mb-0" style="width:100%">
+
+                <thead class="table-success text-dark">
+<tr>
+    <th>ID</th>
+    <th>Book</th>
+    <th>Author</th>
+    <th>Year</th>
+    <th>Edition</th>
+    <th>Publisher</th>
+    <th>Accession No</th>
+    <th>Building</th>
+    <th>Category</th>
+    <th>Status</th>
+    <th class="text-center">Action</th>
+</tr>
+</thead>
+                
+                <tbody>
+<tr th:each="book : ${books}">
+
+    <!-- ID -->
+    <td th:text="${book.id}">1</td>
+
+    <!-- Book (Image + Title) -->
+    <td>
+        <div class="d-flex align-items-center">
+            <img th:if="${book.image}"
+                 th:src="${book.image}"
+                 class="rounded me-2 shadow-sm"
+                 style="width:45px;height:60px;object-fit:cover;">
+
+            <div>
+                <div class="fw-bold" th:text="${book.title}">Title</div>
+            </div>
+        </div>
+    </td>
+
+    <!-- Author -->
+    <td th:text="${book.author}">Author</td>
+
+    <!-- Year -->
+    <td th:text="${book.publishedYear}">2024</td>
+
+    <!-- Edition -->
+    <td th:text="${book.edition}">1st</td>
+
+    <!-- Publisher -->
+    <td th:text="${book.publisher}">Publisher</td>
+
+    <!-- Accession No -->
+    <td>
+        <span class="badge bg-light text-dark"
+              th:text="${book.accessionNo}">
+            ACC001
+        </span>
+    </td>
+
+    <!-- Location -->
+    <td>
+        <div class="small">
+            <div class="fw-semibold" th:text="${book.building}">Building A</div>
+            <span class="text-muted" th:text="${book.shelfNo}">Shelf 1</span>
+        </div>
+    </td>
+
+    <!-- Category -->
+    <td>
+        <span class="badge bg-primary"
+              th:text="${book.category != null ? book.category.name : 'N/A'}">
+        </span>
+    </td>
+
+    <!-- Status -->
+    <td>
+        <span class="badge px-3 py-2 rounded-pill"
+              th:text="${book.rentStatus}"
+              th:classappend="${book.rentStatus.name() == 'AVAILABLE'
+                ? 'bg-success'
+                : 'bg-warning text-dark'}">
+        </span>
+    </td>
+
+    <!-- Action -->
+    
+    <td class="text-center">
+    <div class="btn-group">
+        <button class="btn btn-sm btn-success select-book"
+                th:data-id="${book.id}"
+                th:data-title="${book.title}"
+                th:disabled="${book.rentStatus.name() == 'NOT_FOR_RENT' or book.rentStatus.name() == 'RENTED'}"
+                th:classappend="${book.rentStatus.name() == 'NOT_FOR_RENT' or book.rentStatus.name() == 'RENTED' ? 'opacity-50' : ''}">
+            Select
+        </button>
+    </div>
+</td>
+
+</tr>
+</tbody>
+            
+            </table>
+        
+			</div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- RIGHT: USER TABLE -->
+    <div class="col-md-6">
+
+        <div class="card shadow-sm border-0 rounded-4">
+            <div class="card-header bg-white fw-bold">👤 Users</div>
+
+            <div class="card-body p-0">
+
+                <table id="userTable" class="table table-hover mb-0 align-middle">
+                    <thead class="table-light">
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Select</th>
+                    </tr>
+                    </thead>
+
+                    <tbody>
+                    <tr th:each="user : ${users}">
+                        <td th:text="${user.id}"></td>
+                        <td th:text="${user.name}"></td>
+                        <td th:text="${user.email}"></td>
+
+                        <td>
+                            <span class="badge"
+                                  th:classappend="${user.active ? 'bg-success' : 'bg-danger'}"
+                                  th:text="${user.active ? 'Active' : 'Inactive'}">
+                            </span>
+                        </td>
+
+                       <td>
+    <button class="btn btn-sm btn-primary select-user"
+            th:data-id="${user.id}"
+            th:data-name="${user.name}"
+            th:disabled="${!user.active}"
+            th:classappend="${!user.active ? 'opacity-50' : ''}">
+        Select
+    </button>
+</td>
+                    </tr>
+                    </tbody>
+
+                </table>
+
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+
+
+
+</body>
+</html>

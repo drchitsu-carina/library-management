@@ -1,0 +1,118 @@
+<div th:fragment="content" xmlns:th="http://www.thymeleaf.org">
+    <div class="container py-5">
+        <div class="row justify-content-center">
+            <div class="col-lg-9">
+                <div class="card border-0 shadow-sm" style="border-radius: 15px;">
+                    <div class="profile-header"></div>
+                    <div class="profile-img-container d-flex align-items-end mb-4">
+                        <div class="profile-avatar">
+                            <span th:text="${#strings.substring(user.name, 0, 1)}">U</span>
+                        </div>
+                        <div class="ms-3 mb-2">
+                            <h3 class="fw-bold mb-0" th:text="${user.name}">User Name</h3>
+                            <span class="badge bg-primary rounded-pill" th:text="${user.role}">Role</span>
+                        </div>
+                    </div>
+
+                    <div class="card-body px-5 pb-5">
+                        <div class="row g-4">
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <div class="info-label mb-1">Email</div>
+                                    <div class="info-value" th:text="${user.email}"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <div class="info-label mb-1">Phone</div>
+                                    <div class="info-value" th:text="${user.phone ?: 'N/A'}"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="p-3 border rounded-3 bg-light">
+                                    <div class="info-label mb-1">Address</div>
+                                    <div class="info-value" th:text="${user.address ?: 'No address specified'}"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <hr class="my-5">
+                        <div class="d-flex gap-3 justify-content-end">
+                            <button class="btn btn-outline-secondary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#passwordModal">Change Password</button>
+                            <button class="btn btn-primary rounded-pill px-4" data-bs-toggle="modal" data-bs-target="#editModal">Edit Profile</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5>Edit Profile</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <form id="editForm">
+                        <div class="mb-3"><label>Name</label><input type="text" name="name" class="form-control" th:value="${user.name}"></div>
+                        <div class="mb-3"><label>Phone</label><input type="text" name="phone" class="form-control" th:value="${user.phone}"></div>
+                        <div class="mb-3"><label>Address</label><textarea name="address" class="form-control" th:text="${user.address}"></textarea></div>
+                    </form>
+                </div>
+                <div class="modal-footer"><button type="button" id="saveBtn" class="btn btn-primary">Save Changes</button></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="passwordModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header"><h5>Change Password</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3"><label>Old Password</label><input type="password" id="oldPass" class="form-control"></div>
+                    <div class="mb-3"><label>New Password</label><input type="password" id="newPass" class="form-control"></div>
+                    <div class="mb-3"><label>Confirm Password</label><input type="password" id="confirmPass" class="form-control"></div>
+                    <div id="passErr" class="text-danger d-none">Passwords do not match!</div>
+                </div>
+                <div class="modal-footer"><button type="button" id="updatePassBtn" class="btn btn-dark">Update Password</button></div>
+            </div>
+        </div>
+    </div>
+
+    <script th:inline="javascript">
+        // This ensures the script waits for jQuery even if scripts are at the bottom
+        window.addEventListener('DOMContentLoaded', function() {
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
+
+            $('#saveBtn').click(function() {
+                $.ajax({
+                    url: '/users/profile/update',
+                    type: 'POST',
+                    data: $('#editForm').serialize(),
+                    beforeSend: (xhr) => xhr.setRequestHeader(header, token),
+                    success: () => location.reload()
+                });
+            });
+
+            $('#updatePassBtn').click(function() {
+                const n = $('#newPass').val();
+                if (n !== $('#confirmPass').val()) { $('#passErr').removeClass('d-none'); return; }
+                
+                $.ajax({
+                    url: '/users/profile/change-password',
+                    type: 'POST',
+                    data: { oldPassword: $('#oldPass').val(), newPassword: n },
+                    beforeSend: (xhr) => xhr.setRequestHeader(header, token),
+                    success: function() {
+                        alert("Changed! Logging out...");
+                        const f = document.createElement('form');
+                        f.method = 'POST'; f.action = '/logout';
+                        const i = document.createElement('input');
+                        i.type = 'hidden'; i.name = '_csrf'; i.value = token;
+                        f.appendChild(i); document.body.appendChild(f); f.submit();
+                    },
+                    error: (xhr) => alert(xhr.responseText)
+                });
+            });
+        });
+    </script>
+</div>

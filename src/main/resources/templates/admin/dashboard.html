@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div th:fragment="content">
+    <div class="container-fluid">
+        <h3 class="mb-4 text-dark fw-bold">📊 System Overview</h3>
+        
+        <div class="row g-4">
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-primary text-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-white-50 fw-semibold mb-1">Total Books</h6>
+                            <h2 class="mb-0 fw-bold" th:text="${bookCount}">0</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">📚</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-success text-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-white-50 fw-semibold mb-1">Active Users</h6>
+                            <h2 class="mb-0 fw-bold" th:text="${userCount}">0</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">👥</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-warning text-dark">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-dark-50 fw-semibold mb-1">Rented Books</h6>
+                            <h2 class="mb-0 fw-bold" th:text="${rentCount}">0</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">📑</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-sm-6 col-xl-3">
+                <div class="card border-0 shadow-sm rounded-4 p-3 h-100 bg-danger text-white">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <div>
+                            <h6 class="text-white-50 fw-semibold mb-1">Favorites</h6>
+                            <h2 class="mb-0 fw-bold" th:text="${favCount}">0</h2>
+                        </div>
+                        <div class="fs-1 opacity-50">❤️</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-md-8">
+                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                    <div class="card-header bg-white border-0 py-3">
+                        <h5 class="mb-0 fw-bold">Recent Actions</h5>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item py-3">
+                                <small class="text-muted d-block">Quick Link</small>
+                                <a th:href="@{/admin/books}" class="text-decoration-none fw-semibold">View All Books &rarr;</a>
+                            </div>
+                            <div class="list-group-item py-3">
+                                <small class="text-muted d-block">Inventory Management</small>
+                                <a th:href="@{/admin/categories}" class="text-decoration-none fw-semibold">Manage Categories &rarr;</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

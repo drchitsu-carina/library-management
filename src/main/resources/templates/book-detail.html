@@ -1,0 +1,108 @@
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    
+    <div class="container py-5">
+        <div class="mb-4">
+            <a href="/" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi bi-arrow-left me-2"></i>Back to Library
+            </a>
+        </div>
+
+        <div class="card shadow border-0 overflow-hidden rounded-4">
+            <div class="row g-0">
+                
+                <div class="col-md-4 bg-light d-flex align-items-center justify-content-center p-4 border-end">
+                    <img th:src="${book.image != null && !book.image.isEmpty()} ? ${book.image} : 'https://via.placeholder.com/300x450?text=No+Cover'"
+                         class="img-fluid rounded shadow-sm book-detail-cover" 
+                         th:alt="${book.title}" 
+                         style="max-height: 450px; object-fit: cover;">
+                </div>
+
+                <div class="col-md-8">
+                    <div class="card-body p-5">
+                        
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="text-primary fw-bold text-uppercase tracking-wider" 
+                                  th:text="${book.category != null ? book.category.name : 'General'}">CATEGORY</span>
+                            
+                            <span th:if="${book.rentStatus != null}"
+                                  th:text="${book.rentStatus}"
+                                  th:classappend="${book.rentStatus.name() == 'AVAILABLE' ? 'bg-success' : (book.rentStatus.name() == 'RENTED' ? 'bg-danger' : 'bg-primary')}"
+                                  class="badge rounded-pill px-3 py-2 text-white shadow-sm font-monospace">
+                                STATUS
+                            </span>
+                        </div>
+
+                        <h1 class="fw-bold text-dark mb-2" th:text="${book.title}">Book Title</h1>
+                        <p class="text-muted fs-5 mb-4">
+                            <i class="bi bi-person-circle me-1"></i> By <span class="fw-semibold" th:text="${book.author != null ? book.author : 'Unknown Author'}">Author</span>
+                        </p>
+
+                        <hr class="my-4 text-muted opacity-25">
+
+                        <h4 class="fw-bold mb-3 text-secondary">Library Specifications</h4>
+                        <div class="row g-3">
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3 border-start border-primary border-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Accession No</small>
+                                    <span class="fw-bold text-dark font-monospace" th:text="${book.accessionNo != null ? book.accessionNo : 'N/A'}">-</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3 border-start border-warning border-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Shelf Number / Location</small>
+                                    <span class="fw-bold text-dark" th:text="${book.shelfNo != null ? book.shelfNo : 'N/A'}">-</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Building</small>
+                                    <span class="fw-semibold text-dark" th:text="${book.building != null ? book.building : 'Main Library'}">-</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Publisher</small>
+                                    <span class="fw-semibold text-dark" th:text="${book.publisher != null ? book.publisher : 'N/A'}">-</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Edition</small>
+                                    <span class="fw-semibold text-dark" th:text="${book.edition != null ? book.edition : '1st Edition'}">-</span>
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="p-3 bg-light rounded-3">
+                                    <small class="text-muted d-block text-uppercase fw-bold" style="font-size: 0.75rem;">Published Year</small>
+                                    <span class="fw-semibold text-dark" th:text="${book.publishedYear != null ? book.publishedYear : 'N/A'}">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-5 d-flex gap-3">
+                            <button th:if="${book.rentStatus?.name() == 'AVAILABLE'}" 
+                                    class="btn btn-primary btn-lg px-5 shadow-sm rounded-pill">
+                                <i class="bi bi-bookmark-plus me-2"></i>AVAILABLE
+                            </button>
+                            <button th:unless="${book.rentStatus?.name() == 'AVAILABLE'}" 
+                                    class="btn btn-secondary btn-lg px-5 rounded-pill" disabled>
+                                <i class="bi bi-lock me-2"></i>Currently Unavailable
+                            </button>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .tracking-wider { letter-spacing: 0.05em; }
+        .book-detail-cover { transition: transform 0.3s ease; }
+        .book-detail-cover:hover { transform: scale(1.02); }
+    </style>
+</div>

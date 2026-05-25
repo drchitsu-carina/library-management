@@ -1,0 +1,187 @@
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+
+    <style>
+        /* Home page design နဲ့ ကိုက်ညီအောင် ထပ်ဖြည့်ထားတဲ့ style များ */
+        .info-card {
+            border: none;
+            border-radius: 20px;
+            transition: transform 0.3s ease, shadow 0.3s ease;
+            height: 100%;
+        }
+        .info-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1) !important;
+        }
+        .icon-box {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            background-color: rgba(25, 135, 84, 0.1); /* light success bg */
+            color: #198754;
+            font-size: 1.5rem;
+            margin-right: 15px;
+        }
+        .staff-list li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f1f1;
+        }
+        .staff-list li:last-child { border-bottom: none; }
+        
+        /* Hero section style from home */
+        .contact-hero {
+            background: linear-gradient(135deg, #198754 0%, #146c43 100%);
+            color: white;
+            padding: 60px 0;
+            border-radius: 0 0 50px 50px;
+            margin-bottom: -50px;
+            position: relative;
+            z-index: 0;
+        }
+    </style>
+
+    <div class="contact-hero text-center shadow">
+        <div class="container">
+            <h1 class="fw-bold mb-2">ဆက်သွယ်ရန် အချက်အလက်</h1>
+            <p class="opacity-75">SPSU Library (Mandalay) နှင့် ပတ်သက်သော ဝန်ဆောင်မှုများကို ဤနေရာတွင် စုံစမ်းနိုင်ပါသည်</p>
+        </div>
+    </div>
+
+    <div class="container pb-5" style="position: relative; z-index: 1;">
+        <div class="row g-4 mt-0">
+            
+            <div class="col-md-6">
+                <div class="card info-card shadow-sm p-4">
+                    <h4 class="fw-bold text-success mb-4 d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill me-2"></i> Contact Info
+                    </h4>
+                    
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-geo-alt-fill"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">တည်နေရာ</small>
+                            <span class="fw-semibold">နိုင်ငံတော်ပရိယတ္တိသာသနာ့တက္ကသိုလ် (မန္တလေး)</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-clock-fill"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">ဖွင့်ချိန်</small>
+                            <span class="fw-semibold">တနင်္လာနေ့ မှ သောကြာနေ့ (မနက် ၉:၀၀ - ညနေ ၄:၀၀)</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-telephone-fill"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">ဖုန်းနံပါတ်များ</small>
+                            <span class="fw-semibold text-primary">၀၉-၂၅၁၅၁၉၀၊ ၀၉-၄၀၂၅၇၄၃၈၀၊ ၀၉-၇၈၀၈၂၅၅၉၀</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start">
+                        <div class="icon-box shadow-sm"><i class="bi bi-wifi"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">အင်တာနက်</small>
+                            <span class="badge bg-success shadow-sm">Free Wi-Fi Available</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="card info-card shadow-sm p-4">
+                    <h4 class="fw-bold text-success mb-4 d-flex align-items-center">
+                        <i class="bi bi-gear-wide-connected me-2"></i> Services
+                    </h4>
+                    
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-journal-check"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">စာအုပ်ငှားရမ်းခြင်း</small>
+                            <span class="fw-semibold">တစ်ကြိမ်လျှင် ၅ အုပ် (၁၄ ရက်အထိ)</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-search"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">သုတေသနအကူအညီ</small>
+                            <span class="fw-semibold">စာအုပ်စာတမ်းရှာဖွေရန် အကူအညီပေးပါသည်</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <div class="icon-box shadow-sm"><i class="bi bi-collection-fill"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">စုစုပေါင်းစာအုပ်များ</small>
+                            <span class="badge bg-dark">40,000+ books</span>
+                        </div>
+                    </div>
+
+                    <div class="d-flex align-items-start">
+                        <div class="icon-box shadow-sm"><i class="bi bi-translate"></i></div>
+                        <div>
+                            <small class="text-muted fw-bold d-block">ဘာသာစကားများ</small>
+                            <span class="fw-semibold">မြန်မာ၊ ပါဠိ၊ သက္ကတ၊ အင်္ဂလိပ်</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="card info-card shadow-sm p-4">
+                    <h4 class="fw-bold text-success mb-4 d-flex align-items-center">
+                        <i class="bi bi-people-fill me-2"></i> Management
+                    </h4>
+                    
+                    <div class="row row-cols-1 row-cols-md-3 g-4">
+                        <div class="col">
+                            <h6 class="fw-bold text-primary border-bottom pb-2">စာကြည့်တိုက်မှူးများ</h6>
+                            <ul class="staff-list list-unstyled">
+                                <li><strong>ဘဒ္ဒန္တနန္ဒိဝရ</strong><br><small class="text-muted">အဂ္ဂမဟာပဏ္ဍိတ (စာကြည့်တိုက်မှူး)</small></li>
+                                <li><strong>ဘဒ္ဒန္တကဝိဓဇ</strong><br><small class="text-muted">လက်ထောက်စာကြည့်တိုက်မှူး</small></li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold text-primary border-bottom pb-2">ဌာနစုမှူးများ</h6>
+                            <ul class="staff-list list-unstyled">
+                                <li><i class="bi bi-check2-circle text-success me-2"></i>ဘဒ္ဒန္တခမေသက</li>
+                                <li><i class="bi bi-check2-circle text-success me-2"></i>ဘဒ္ဒန္တဝိစိတ္တ</li>
+                                <li><i class="bi bi-check2-circle text-success me-2"></i>ဘဒ္ဒန္တခမာဝုဓ</li>
+                            </ul>
+                        </div>
+                        <div class="col">
+                            <h6 class="fw-bold text-primary border-bottom pb-2">စာကြည့်တိုက်ဝန်ထမ်းများ</h6>
+                            <ul class="staff-list list-unstyled small">
+                                <li>၁။ ဒေါ်စိုးစိုးမိုး (ဦးစီးအရာရှိ)</li>
+                                <li>၂။ ဒေါ်ငြိမ်းငြိမ်းအောင် (စာပေ လ/ထ-၁)</li>
+                                <li>၃။ ဒေါ်ချယ်ရီစံ (စာရင်းကိုင်-၂)</li>
+                                <li>၄။ ဦးအောင်ကိုဇင် (စနစ်သရုပ်ခွဲမှူး)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 mb-5">
+                <div class="card info-card shadow-sm p-4 border-start border-success border-4">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box"><i class="bi bi-bookmarks-fill"></i></div>
+                        <div>
+                            <h5 class="fw-bold mb-1">ရရှိနိုင်သော အမျိုးအစားများ</h5>
+                            <p class="text-muted mb-0">ပါဠိ၊ ဗုဒ္ဓဘာသာ၊ ဘာသာစကား၊ သိပ္ပံ၊ ပထဝီ၊ ဘာသာရေး စသည်ဖြင့် အမျိုးအစားစုံလင်စွာ ဖတ်ရှုနိုင်ပါသည်။</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,156 @@
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css">
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #2e7d32 0%, #1b5e20 100%);
+            color: white;
+            padding: 40px 0;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 40px;
+        }
+        .table-card {
+            border-radius: 20px;
+            border: none;
+            overflow: hidden;
+        }
+        .dataTables_filter input {
+            border-radius: 50px;
+            padding: 8px 20px;
+            border: 1px solid #ddd;
+            width: 300px !important;
+        }
+        .manuscript-title {
+            color: #2e7d32;
+            font-weight: 600;
+        }
+        .badge-style {
+            padding: 6px 12px;
+            border-radius: 50px;
+            font-weight: 500;
+        }
+    </style>
+
+    <div class="page-header shadow-sm">
+        <div class="container text-center">
+            <h1 class="fw-bold"><i class="bi bi-journal-richtext me-2"></i>ပေစာနှင့် ပုရပိုက်များ</h1>
+            <p class="lead opacity-75">SPSU Library - Palm-leaf & Parabaik Collection</p>
+        </div>
+    </div>
+
+    <div class="container pb-5">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h4 class="text-secondary mb-0">ရှာဖွေမှုရလဒ်များ</h4>
+            <a th:href="@{/parabikes/add}" class="btn btn-success rounded-pill px-4 shadow-sm" sec:authorize="hasRole('ADMIN')">
+                <i class="bi bi-plus-circle me-2"></i>အသစ်ထည့်ရန်
+            </a>
+        </div>
+
+        <div class="card table-card shadow">
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    
+                    <table id="parabikeTable" class="table table-hover align-middle mb-0">
+                    <thead class="table-success text-dark">
+                        <tr>
+                            <th>ID</th>
+                            <th>No.</th>
+                            <th>Accession No.</th>
+                            <th>Name (Title)</th>
+                            <th>Begin (အစ)</th>
+                            <th>End (အဆုံး)</th>
+                            <th>Decoration</th>
+                            <th>Remark</th>
+                            <th class="text-center">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="p : ${parabikes}">
+                            <td th:text="${p.id}" class="fw-bold text-muted"></td>
+                            <td th:text="${p.no}"></td>
+                            <td>
+                                <span class="badge bg-light text-dark shadow-sm" th:text="${p.libOwnNo}"></span>
+                            </td>
+                            <td>
+                                <div class="fw-bold text-success" th:text="${p.name}"></div>
+                            </td>
+                            <td th:text="${p.begin}"></td>
+                            <td th:text="${p.end}"></td>
+                            <td>
+                                <div th:if="${p.goldLeafSugarCame != '-' and p.goldLeafSugarCame != null}">
+                                    <span class="badge bg-warning text-dark rounded-pill" th:text="${p.goldLeafSugarCame}"></span>
+                                </div>
+                                <div th:if="${p.plainInkBorderedLeaf != '-' and p.plainInkBorderedLeaf != null}" class="mt-1">
+                                    <small class="text-muted">ကြောင်းရေ:</small>
+                                    <span class="badge bg-info text-white rounded-pill" th:text="${p.plainInkBorderedLeaf}"></span>
+                                </div>
+                            </td>
+                            <td>
+                                <small class="text-muted" th:text="${p.remark}"></small>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button type="button"
+                                            class="btn btn-sm btn-outline-primary rounded-pill px-3"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editManuscriptModal"
+                                            th:data-id="${p.id}"
+                                            th:data-no="${p.no}"
+                                            th:data-libownno="${p.libOwnNo}"
+                                            th:data-name="${p.name}"
+                                            th:data-begin="${p.begin}"
+                                            th:data-end="${p.end}"
+                                            th:data-plain="${p.plainInkBorderedLeaf}"
+                                            th:data-gold="${p.goldLeafSugarCame}"
+                                            th:data-remark="${p.remark}">
+                                        ✏️ Edit
+                                    </button>
+                                    <a th:href="@{/admin/parabike/delete/{id}(id=${p.id})}"
+                                       class="btn btn-sm btn-outline-danger rounded-pill px-3 ms-1"
+                                       onclick="return confirm('ဖျက်ရန် သေချာပါသလား?')">
+                                        🗑 Delete
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+               
+                    
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        $(document).ready(function() {
+            $('#parabikeTable').DataTable({
+                "pageLength": 10,
+                "language": {
+                    "search": "",
+                    "searchPlaceholder": "ဒီမှာ ရှာဖွေနိုင်ပါသည်...",
+                    "paginate": {
+                        "next": "နောက်သို့",
+                        "previous": "ရှေ့သို့"
+                    },
+                    "lengthMenu": "_MENU_ ခုစီပြမည်",
+                    "info": "စုစုပေါင်း _TOTAL_ ခုတွင် _START_ မှ _END_ အထိ ပြသနေသည်"
+                },
+                "columnDefs": [
+                    { "orderable": false, "targets": 6 } // Action column ကို sorting ပိတ်ထားသည်
+                ]
+            });
+
+            // Search box design ပြင်ရန်
+            $('.dataTables_filter').addClass('mb-3');
+        });
+    </script>
+</div>

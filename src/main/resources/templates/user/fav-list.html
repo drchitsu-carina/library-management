@@ -1,0 +1,250 @@
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <div class="container py-4 py-lg-5">
+
+        <!-- HEADER -->
+
+        <div class="fav-header text-center mb-5">
+
+            <h1 class="fav-title">
+                <i class="bi bi-heart-fill text-warning"></i>
+                <span th:text="#{fav.title}"></span>
+            </h1>
+
+            <p class="fav-subtitle mb-4"
+               th:text="#{fav.subtitle}">
+            </p>
+
+            <!-- SEARCH -->
+
+            <div class="search-box">
+
+                <i class="bi bi-search"></i>
+
+                <input type="search"
+                       id="customSearch"
+                       class="form-control"
+                       th:placeholder="#{fav.search}">
+
+            </div>
+
+        </div>
+
+        <!-- HIDDEN DATATABLE -->
+
+        <table id="bookDataTable" class="d-none">
+
+            <thead>
+            <tr>
+                <th>Data</th>
+            </tr>
+            </thead>
+
+            <tbody>
+
+            <tr th:each="book : ${books}">
+
+                <td th:text="${book.title + ' ' + (book.author ?: '') + ' ' + (book.category != null ? book.category.name : '')}"></td>
+
+            </tr>
+
+            </tbody>
+
+        </table>
+
+        <!-- BOOK GRID -->
+
+        <div class="row g-4"
+             id="bookCardsContainer">
+
+            <div class="col-12 col-sm-6 col-md-4 col-xl-3 card-item"
+                 th:each="book, iterStat : ${books}"
+                 th:data-index="${iterStat.index}">
+
+                <div class="card h-100 shadow-sm book-card">
+
+                    <!-- IMAGE -->
+
+                    <div class="book-image-wrapper">
+
+                        <!-- STATUS -->
+
+                        <div class="status-badge">
+
+                            <span th:class="${book.rentStatus.name() == 'AVAILABLE'} 
+                            ? 'badge bg-success rounded-pill px-3 py-2'
+                            : 'badge bg-danger rounded-pill px-3 py-2'"
+
+                                  th:text="${book.rentStatus}">
+                            </span>
+
+                        </div>
+
+                        <!-- FAVORITE -->
+
+                        <button sec:authorize="isAuthenticated()"
+                                th:onclick="'toggleFavorite(this, ' + ${book.id} + ')'"
+                                class="fav-btn">
+
+                            <i class="bi bi-heart-fill text-danger"></i>
+
+                        </button>
+
+                        <!-- IMAGE -->
+
+                        <img th:src="${book.image != null ? book.image : 'https://via.placeholder.com/150x200?text=No+Cover'}"
+                             alt="Book">
+
+                    </div>
+
+                    <!-- BODY -->
+
+                    <div class="card-body d-flex flex-column p-4">
+
+                        <div class="category-text mb-2"
+                             th:text="${book.category != null ? book.category.name : 'General'}">
+                        </div>
+
+                        <h5 class="book-title"
+                            th:text="${book.title}">
+                        </h5>
+
+                        <p class="author-text small mb-4">
+
+                            <i class="bi bi-person-fill me-1 text-warning"></i>
+
+                            <span th:text="${book.author}"></span>
+
+                        </p>
+
+                        <div class="mt-auto d-grid">
+
+                            <a th:href="@{/books/details/{id}(id=${book.id})}"
+                               class="btn btn-success details-btn">
+
+                                <i class="bi bi-book-half me-2"></i>
+
+                                <span th:text="#{fav.details}"></span>
+
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- EMPTY -->
+
+        <div id="noResults"
+             class="d-none mt-5">
+
+            <div class="empty-box">
+
+                <i class="bi bi-heartbreak-fill"></i>
+
+                <h3 class="fw-bold mt-4"
+                    th:text="#{fav.empty}">
+                </h3>
+
+                <p class="text-muted"
+                   th:text="#{fav.empty.subtitle}">
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- JS -->
+
+    <script th:inline="javascript">
+
+        $(document).ready(function() {
+
+            var table = $('#bookDataTable').DataTable({
+                dom: 'lrtip',
+                pageLength: 12
+            });
+
+            function syncCards() {
+
+                $('.card-item').hide();
+
+                table.rows({
+                    page: 'current',
+                    search: 'applied'
+                }).indexes().each(function(idx) {
+
+                    $('.card-item[data-index="' + idx + '"]').show();
+
+                });
+
+                $('#noResults').toggleClass(
+                    'd-none',
+                    table.rows({ search: 'applied' }).count() > 0
+                );
+            }
+
+            $('#customSearch').on('keyup', function(){
+
+                table.search($(this).val()).draw();
+
+            });
+
+            table.on('draw', syncCards);
+
+            syncCards();
+
+        });
+
+        function toggleFavorite(btn, bookId) {
+
+            const token = $("meta[name='_csrf']").attr("content");
+            const header = $("meta[name='_csrf_header']").attr("content");
+
+            $.ajax({
+
+                url: '/favourite/toggle',
+                type: 'POST',
+                data: { bookId: bookId },
+
+                beforeSend: function(xhr) {
+
+                    if (header && token) {
+                        xhr.setRequestHeader(header, token);
+                    }
+
+                },
+
+                success: function() {
+
+                    $(btn).closest('.card-item').fadeOut(300, function() {
+
+                        $(this).remove();
+
+                    });
+
+                },
+
+                error: function() {
+
+                    alert("Action failed.");
+
+                }
+
+            });
+
+        }
+
+    </script>
+
+</div>

@@ -1,0 +1,35 @@
+<div th:fragment="sidebar" class="sidebar-wrapper h-100 d-flex flex-column p-3 bg-dark text-white">
+    <h4 class="text-white fw-bold text-center my-3 pb-3 border-bottom border-secondary">
+        <i class="bi bi-person-badge text-success me-2"></i>Admin Panel
+    </h4>
+
+    <div class="nav nav-pills flex-column mb-auto gap-1 admin-nav-links">
+        <a href="/admin/dashboard" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-speedometer2 me-3 fs-5 text-secondary"></i>Dashboard
+        </a>
+        <a href="/admin/books" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-journal-bookmark-fill me-3 fs-5 text-secondary"></i>Books
+        </a>
+        <a href="/admin/categories" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-collection-fill me-3 fs-5 text-secondary"></i>Categories
+        </a>
+        <a href="/admin/rents/process" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-cart-plus-fill me-3 fs-5 text-secondary"></i>Rent Book
+        </a>
+        <a href="/admin/rents" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-clock-history me-3 fs-5 text-secondary"></i>Rent Records
+        </a>
+        <a href="/admin/users" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-person-badge-fill me-3 fs-5 text-secondary"></i>Users
+        </a>
+        <a href="/admin/parabikes" class="nav-link text-white px-3 py-2.5 rounded-3 d-flex align-items-center">
+            <i class="bi bi-file-earmark-text-fill me-3 fs-5 text-secondary"></i>Palm-leaf & Parabaik
+        </a>
+    </div>
+
+    <form th:action="@{/logout}" method="post" class="pt-3 border-top border-secondary">
+        <button type="submit" class="btn btn-danger w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center">
+            <i class="bi bi-door-open-fill me-2"></i>Logout
+        </button>
+    </form>
+</div>

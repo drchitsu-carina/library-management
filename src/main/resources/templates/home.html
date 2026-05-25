@@ -1,0 +1,164 @@
+<div th:fragment="content"
+     xmlns:th="http://www.thymeleaf.org"
+     xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+    <link rel="stylesheet" th:href="@{/css/theme.css}">
+    <div class="container py-4 py-lg-5">
+
+        <div class="hero-section text-center mb-5">
+            <div class="position-relative">
+                <h1 class="hero-title mb-3" th:text="#{home.title}">SPSU Library</h1>
+                <p class="hero-subtitle mb-4" th:text="#{home.subtitle}">Browse our collection</p>
+
+                <div class="search-wrapper">
+                    <input type="search" id="customSearch" class="form-control search-input" th:placeholder="#{search.placeholder}">
+                    <i class="bi bi-search search-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="d-flex justify-content-center mb-4">
+            <ul class="nav nav-pills gap-2 justify-content-center" id="categoryTabs" role="tablist">
+                </ul>
+        </div>
+
+        <div class="tab-content" id="categoryTabsContent">
+            </div>
+
+        <div id="noResults" class="d-none mt-5">
+            <div class="empty-box text-center">
+                <i class="bi bi-search fs-1 text-secondary"></i>
+                <h3 class="mt-3 fw-bold" th:text="#{no.result}">No books found</h3>
+                <p class="text-muted" th:text="#{no.result.desc}">Try another keyword</p>
+            </div>
+        </div>
+    </div>
+
+    
+    <script th:inline="javascript">
+    $(document).ready(function () {
+        // 1. SAFE DATA EXTRACTION
+        // We manually build a flat array to avoid circular reference errors in the serializer
+        const allBooks = [];
+        /*[# th:each="b : ${books}"]*/
+            allBooks.push({
+                id: [[${b.id}]],
+                title: [[${b.title}]],
+                author: [[${b.author}]],
+                image: [[${b.image}]],
+                rentStatus: [[${b.rentStatus?.name()}]],
+                categoryName: [[${b.category != null ? b.category.name : 'General'}]]
+            });
+        /*[/]*/
+
+        const favIds = [[${favouriteBookIds}]] || [];
+        const isAuth = [[${#authorization.expression('isAuthenticated()')}]];
+        const authorLabel = [[#{author.label}]] || 'Author';
+        const detailsBtnLabel = [[#{details.button}]] || 'View Details';
+
+        function renderTabs(filterText = "") {
+            const $nav = $('#categoryTabs').empty();
+            const $content = $('#categoryTabsContent').empty();
+
+            // 2. Grouping logic using categoryName
+            const filteredGroups = allBooks.reduce((acc, book) => {
+                const catName = book.categoryName;
+                const searchStr = `${book.title} ${book.author} ${catName}`.toLowerCase();
+                
+                if (searchStr.includes(filterText.toLowerCase())) {
+                    if (!acc[catName]) acc[catName] = [];
+                    acc[catName].push(book);
+                }
+                return acc;
+            }, {});
+
+            const categories = Object.keys(filteredGroups).sort();
+            $('#noResults').toggleClass('d-none', categories.length > 0);
+
+            categories.forEach((cat, index) => {
+                const safeId = "cat-" + index; // Simpler ID to avoid special character issues
+                const isActive = index === 0 ? 'active' : '';
+
+                // Add the Tab Tag
+                $nav.append(`
+                    <li class="nav-item" role="presentation">
+                        <button class="nav-link ${isActive} rounded-pill px-4 shadow-sm fw-bold border mb-2" 
+                                id="${safeId}-tab" data-bs-toggle="tab" 
+                                data-bs-target="#content-${safeId}" type="button" role="tab">
+                            ${cat} <span class="badge rounded-pill bg-dark ms-1">${filteredGroups[cat].length}</span>
+                        </button>
+                    </li>
+                `);
+
+                // Add the Book Grid
+                let paneHtml = `<div class="tab-pane fade show ${isActive}" id="content-${safeId}" role="tabpanel">
+                                    <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">`;
+
+                filteredGroups[cat].forEach(book => {
+                    const statusColor = book.rentStatus === 'AVAILABLE' ? 'bg-success' : (book.rentStatus === 'RENTED' ? 'bg-danger' : 'bg-primary');
+                    const isFav = favIds.includes(book.id);
+                    const bookImg = book.image ? book.image : 'https://via.placeholder.com/200x300?text=No+Cover';
+
+                    paneHtml += `
+                        <div class="col">
+                            <div class="card h-100 shadow-sm book-card border-0">
+                                <div class="position-absolute top-0 end-0 m-3 z-3">
+                                    <span class="status-badge shadow-sm ${statusColor} text-white">${book.rentStatus || 'NEW'}</span>
+                                </div>
+                                <div class="book-img-wrapper">
+                                    ${isAuth ? `
+                                        <button class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFavorite(this, ${book.id})">
+                                            <i class="bi ${isFav ? 'bi-heart-fill text-danger' : 'bi-heart'}"></i>
+                                        </button>` : ''}
+                                    <img src="${bookImg}" alt="Book Cover">
+                                </div>
+                                <div class="card-body d-flex flex-column p-4">
+                                    <small class="text-primary fw-bold text-uppercase mb-2">${cat}</small>
+                                    <h5 class="fw-bold book-title mb-3">${book.title}</h5>
+                                    <p class="text-muted author-text mb-4">
+                                        <i class="bi bi-person-circle me-1"></i> ${authorLabel}: ${book.author || 'Unknown'}
+                                    </p>
+                                    <div class="mt-auto d-grid">
+                                        <a href="/books/details/${book.id}" class="btn btn-primary shadow-sm">
+                                            <i class="bi bi-book-half me-1"></i> ${detailsBtnLabel}
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                paneHtml += `</div></div>`;
+                $content.append(paneHtml);
+            });
+        }
+
+        $('#customSearch').on('keyup', function () { renderTabs($(this).val()); });
+        renderTabs();
+    });
+
+    function toggleFavorite(btn, bookId) {
+        const token = $("meta[name='_csrf']").attr("content");
+        const header = $("meta[name='_csrf_header']").attr("content");
+        $.ajax({
+            url: '/favourite/toggle',
+            type: 'POST',
+            data: { bookId: bookId },
+            beforeSend: function (xhr) { if (header && token) xhr.setRequestHeader(header, token); },
+            success: function () {
+                $(btn).toggleClass('active');
+                const icon = $(btn).find('i');
+                if ($(btn).hasClass('active')) icon.removeClass('bi-heart').addClass('bi-heart-fill text-danger');
+                else icon.removeClass('bi-heart-fill text-danger').addClass('bi-heart');
+            }
+        });
+    }
+</script>
+    
+    
+    <style>
+        .nav-pills .nav-link { color: #555; background: #f8f9fa; border: 1px solid #dee2e6; transition: 0.3s; }
+        .nav-pills .nav-link.active { background-color: var(--bs-primary) !important; color: white !important; border-color: var(--bs-primary); }
+        .nav-pills .nav-link:hover:not(.active) { background-color: #e9ecef; }
+        .status-badge { padding: 4px 12px; border-radius: 50px; font-size: 0.75rem; font-weight: bold; }
+    </style>
+</div>

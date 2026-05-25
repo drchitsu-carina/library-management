@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{layout :: content}">
+<body>
+
+<div th:fragment="content">
+
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4 p-3 bg-white shadow-sm rounded-4 gap-3">
+        <div>
+            <h3 class="fw-bold mb-0 text-success">
+                📑 Rent Book Records
+            </h3>
+            <small class="text-muted">Monitor and manage book rental activities</small>
+        </div>
+        
+        <div class="btn-group shadow-sm p-1 bg-light rounded-pill border" role="group" aria-label="Status Filters">
+            <button type="button" class="btn btn-sm rounded-pill px-3 active filter-btn" data-status="ALL">
+                <i class="bi bi-collection me-1"></i> All
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 text-warning filter-btn" data-status="BORROWED">
+                <i class="bi bi-journal-arrow-up me-1"></i> Borrowed
+            </button>
+            <button type="button" class="btn btn-sm rounded-pill px-3 text-success filter-btn" data-status="RETURNED">
+                <i class="bi bi-journal-arrow-down me-1"></i> Returned
+            </button>
+        </div>
+    </div>
+
+    <div class="card border-0 shadow-sm rounded-4 overflow-hidden" >
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0" id="rentTable" style="width:100%"> 
+                    <thead class="table-success text-dark">
+                        <tr>
+                            <th class="ps-4">ID</th>
+                            <th>User</th>
+                            <th>Book</th>
+                            <th>Rent Date</th>
+                            <th>Due Date</th>
+                            <th>Days Remaining</th>
+                            <th>Status</th>
+                            <th class="text-center pe-4">Action</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr th:each="r : ${rents}">
+                            <td class="ps-4 fw-semibold" th:text="${r.id}"></td>
+                            <td class="fw-bold text-dark" th:text="${r.user.name}"></td>
+                            <td th:text="${r.book.title}"></td>
+                            <td th:text="${r.rentDate}"></td>
+                            <td th:text="${r.dueDate}"></td>
+                            
+                            <td>
+                                <div th:with="
+                                    today=${T(java.time.LocalDate).now()},
+                                    dueDate=${r.dueDate},
+                                    daysBetween=${T(java.time.temporal.ChronoUnit).DAYS.between(today, dueDate)}">
+                                    
+                                    <span th:if="${r.status.name() == 'RETURNED'}" class="text-muted">-</span>
+
+                                    <div th:if="${r.status.name() == 'BORROWED'}">
+                                        <span th:if="${daysBetween > 0}" class="badge bg-info text-dark rounded-pill px-3">
+                                            <i class="bi bi-clock me-1"></i> <span th:text="${daysBetween + ' days left'}"></span>
+                                        </span>
+
+                                        <span th:if="${daysBetween == 0}" class="badge bg-warning text-dark rounded-pill px-3">
+                                            <i class="bi bi-exclamation-triangle me-1"></i> Due Today
+                                        </span>
+
+                                        <span th:if="${daysBetween < 0}" class="badge bg-danger rounded-pill">
+                                            <i class="bi bi-calendar-x me-1"></i> 
+                                            <span th:text="${T(java.lang.Math).abs(daysBetween) + ' days expired'}"></span>
+                                        </span>
+                                    </div>
+                                </div>
+                            </td>
+
+                            <td>
+                                <span th:class="${r.status.name() == 'BORROWED' ? 'bg-warning text-dark badge rounded-pill' : 'bg-success badge rounded-pill'}"
+                                      th:text="${r.status}">
+                                      
+                                </span>
+                            </td>
+
+                            <td class="text-center pe-4">
+                                <form th:if="${r.status.name() == 'BORROWED'}" 
+                                      th:action="@{'/admin/rents/return/' + ${r.id}}" 
+                                      method="post">
+                                    <button type="submit" 
+                                            class="btn btn-sm btn-outline-danger rounded-pill px-3"
+                                            onclick="return confirm('ဒီစာအုပ်ကို ပြန်အပ်နှံမှာ သေချာပါသလား?')">
+                                        <i class="bi bi-arrow-return-left me-1"></i> Return
+                                    </button>
+                                </form>
+                                
+                                <span th:if="${r.status.name() == 'RETURNED'}" class="text-success small fw-bold">
+                                    <i class="bi bi-check-circle-fill me-1"></i> Completed
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="rentModal" tabindex="-1">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content rounded-4 border-0 shadow">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title fw-bold">📚 Create Rent</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <div class="row g-4">
+                        <div class="col-md-7">
+                            <label class="form-label fw-bold text-muted small uppercase">Recipient User</label>
+                            <select id="userSelect" class="form-select mb-3 rounded-3 shadow-sm">
+                                <option value="">Select User</option>
+                                <option th:each="u : ${users}" th:value="${u.id}" th:text="${u.name}"></option>
+                            </select>
+
+                            <div id="userHistory" class="alert alert-info d-none rounded-3 border-0"></div>
+
+                            <label class="form-label fw-bold text-muted small uppercase">Choose Book</label>
+                            <select id="bookSelect" class="form-select mb-3 rounded-3 shadow-sm">
+                                <option value="">Select Book</option>
+                                <option th:each="b : ${books}"
+                                        th:value="${b.id}"
+                                        th:text="${b.title}"
+                                        th:attr="data-image=${b.image}, data-status=${b.rentStatus}">
+                                </option>
+                            </select>
+
+                            <div class="row g-2">
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Rent Date</label>
+                                    <input type="date" id="rentDate" class="form-control rounded-3 shadow-sm">
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label small fw-bold">Due Date</label>
+                                    <input type="date" id="dueDate" class="form-control rounded-3 shadow-sm">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-md-5 d-flex flex-column align-items-center justify-content-center border-start">
+                            <label class="form-label fw-bold text-muted small mb-3">Book Preview</label>
+                            <img id="bookPreview" src="/images/no-cover.jpg"
+                                 style="width:140px;height:200px;object-fit:cover"
+                                 class="rounded shadow-sm border">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="modal-footer border-0">
+                    <button class="btn btn-secondary rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button id="confirmRent" class="btn btn-success rounded-pill px-4" disabled>
+                        Confirm Rent
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // Slight timeout handles table DOM compilation safely under scrollX layouts
+            setTimeout(function() {
+                var table = $('#rentTable').DataTable();
+                var currentFilter = "ALL";
+
+                // Absolute DOM Node isolation search extension
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        if (currentFilter === "ALL") return true;
+                        
+                        // Extract target DOM element strictly from actual Column 6 (Status Column) node
+                        var cellNode = table.cell(dataIndex, 6).node();
+                        var statusText = $(cellNode).text().trim().toUpperCase();
+                        
+                        return statusText === currentFilter;
+                    }
+                );
+
+                // Filter Click UI controls
+                $('.filter-btn').on('click', function() {
+                    $('.filter-btn').removeClass('active bg-white shadow-sm text-dark fw-bold');
+                    $(this).addClass('active bg-white shadow-sm text-dark fw-bold');
+                    
+                    currentFilter = $(this).attr('data-status');
+                    table.draw(); 
+                });
+
+                $('.filter-btn[data-status="ALL"]').addClass('bg-white shadow-sm text-dark fw-bold');
+            }, 250);
+        });
+    </script>
+</div>
+
+</body>
+</html>
